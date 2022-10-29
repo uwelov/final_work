@@ -22,6 +22,8 @@ unsigned long bot_lasttime; // last time messages' scan has been done
 bool cooking;
 unsigned int cookingTime;
 int cookingT;
+unsigned int TimeStartCooking = 0;
+bool ReadyToCooking = false;
 float tempC; // temperature in Celsius
 /////
 unsigned int ConvertToMS(unsigned int minutes){
@@ -43,17 +45,21 @@ void handleNewMessages(int numNewMessages){
   
   Serial.print("handleNewMessages ");
   Serial.println(numNewMessages);
-
+  String global_chat_id = " ";
   for (int i = 0; i < numNewMessages; i++){
     String chat_id = bot.messages[i].chat_id;
+    global_chat_id = chat_id;
     String text = bot.messages[i].text;
     String from_name = bot.messages[i].from_name;
     if (from_name == "")
       from_name = "Guest";
     if (text == "/status"){
         bot.sendMessage(chat_id, String(tempC)+"°C", "");
+        if(cooking && !TimeStartCooking){
+          bot.sendMessage(chat_id, "Залишилось "+String(((cookingTime * 60000) - (millis())-TimeStartCooking) / 60000)+ " хвилин до повного приготування",  "");
+        }
       }
-    else if (text == "/start"){
+    else if (text == "/start "){
       String welcome = "Привіт, " + from_name + ". Мене звати Єва, я бот-помічник розумної йогуртниці.\n";
       bot.sendMessage(chat_id, welcome, "Markdown");
       welcome = "/help - для детальної інформації команд";
@@ -82,7 +88,7 @@ void handleNewMessages(int numNewMessages){
       if(text.indexOf("Bifidok") != -1){
         //Меняем время и температуру
         if(!cooking){
-            Select(48,46);//Select(Время в минутах, температура в С)
+            Select(600,22);//Select(Время в минутах, температура в С)
             bot.sendMessage(chat_id, "Ви обрали: кефір та напій “Біфідок”", "Markdown");
         }
         else
@@ -93,7 +99,7 @@ void handleNewMessages(int numNewMessages){
       else if(text.indexOf("Acidophilin") != -1){
         //Меняем время и температуру
         if(!cooking){
-            Select(48,46);
+            Select(300,32);
             bot.sendMessage(chat_id, "Ви обрали: напій “Ацидофілін”", "Markdown");
         }
         //Дополнить алгоритмом выбора фун. части
@@ -104,7 +110,7 @@ void handleNewMessages(int numNewMessages){
       else if(text.indexOf("Ryazhenko") != -1){
         //Меняем время и температуру
         if(!cooking){
-            Select(48,46);
+            Select(300,42);
             bot.sendMessage(chat_id, "Ви обрали: напій “Ряжанка”", "Markdown");
         }
         //Дополнить алгоритмом выбора фун. части
@@ -115,7 +121,7 @@ void handleNewMessages(int numNewMessages){
       else if(text.indexOf("BioYogurt") != -1){
         //Меняем время и температуру
         if(!cooking){
-            Select(48,46);
+            Select(180,42);
             bot.sendMessage(chat_id, "Ви обрали: напій “Біойогурт”", "Markdown");
         }
         //Дополнить алгоритмом выбора фун. части
@@ -126,7 +132,7 @@ void handleNewMessages(int numNewMessages){
       else if(text.indexOf("Acidolact") != -1){
         //Меняем время и температуру
          if(!cooking){
-            Select(48,46);
+            Select(300,42);
             bot.sendMessage(chat_id, "Ви обрали: напій “Ацидолакт”", "Markdown");
          }
         //Дополнить алгоритмом выбора фун. части
@@ -137,7 +143,7 @@ void handleNewMessages(int numNewMessages){
       else if(text.indexOf("Bifilin") != -1){
         //Меняем время и температуру
         if(!cooking){
-            Select(48,46);
+            Select(360,44);
             bot.sendMessage(chat_id, "Ви обрали: напій “Біфілін”", "Markdown");
         }
         //Дополнить алгоритмом выбора фун. части
@@ -148,7 +154,7 @@ void handleNewMessages(int numNewMessages){
       else if(text.indexOf("Herolact") != -1){
         //Меняем время и температуру
          if(!cooking){
-            Select(48,46);
+            Select(540,37);
             bot.sendMessage(chat_id, "Ви обрали: напій “Геролакт”", "Markdown");
          }
         //Дополнить алгоритмом выбора фун. части
@@ -162,29 +168,37 @@ void handleNewMessages(int numNewMessages){
     
     
     if(text.indexOf("/about") != -1){
+      
       if(text.indexOf("Bifidok") != -1){
+        
         bot.sendMessage(chat_id, "“Біфідок”", "Markdown");
       }
       else if(text.indexOf("Acidophilin") != -1){
+                
         bot.sendMessage(chat_id, "“Ацидофілін”", "Markdown");
       }
       else if(text.indexOf("Ryazhenko") != -1){
+        
         //Дополнить алгоритмом выбора фун. части
         bot.sendMessage(chat_id, "“Ряжанка”", "Markdown");
       }
       else if(text.indexOf("BioYogurt") != -1){
+        
         //Дополнить алгоритмом выбора фун. части
         bot.sendMessage(chat_id, "“Біойогурт”", "Markdown");
       }
       else if(text.indexOf("Acidolact") != -1){
+        
         //Дополнить алгоритмом выбора фун. части
         bot.sendMessage(chat_id, "“Ацидолакт”", "Markdown");
       }
       else if(text.indexOf("Bifilin") != -1){
+                
         //Дополнить алгоритмом выбора фун. части
         bot.sendMessage(chat_id, "“Біфілін”", "Markdown");
       }
       else if(text.indexOf("Herolact") != -1){
+        
         //Дополнить алгоритмом выбора фун. части
         bot.sendMessage(chat_id, "“Геролакт”", "Markdown");
       }
@@ -192,9 +206,9 @@ void handleNewMessages(int numNewMessages){
         bot.sendMessage(chat_id, "Поки що такого рецепту не існує :(", "Markdown");
       }
     }
-    else{
-        bot.sendMessage(chat_id, "Поки що такого команди немає :(", "Markdown");
-      }
+    //else{
+        //bot.sendMessage(chat_id, "Поки що такого команди немає :(", "Markdown");
+      //}
   }
  }
 
@@ -235,8 +249,7 @@ void setup() {
   }
   Serial.println(now);
 }
-unsigned int TimeStartCooking = 0;
-bool ReadyToCooking = false;
+
 void loop() {
   DS18B20.requestTemperatures();       // send the command to get temperatures
   tempC = DS18B20.getTempCByIndex(0);  // read temperature in °C
@@ -261,6 +274,12 @@ void loop() {
         }
         else{
         //Тут проверки на температуру
+        if(tempC >= cookingT){
+        digitalWrite(HEATER, LOW);
+      }
+      else{
+        digitalWrite(HEATER, HIGH);
+      }
         }
       }
     }
